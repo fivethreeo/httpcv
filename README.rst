@@ -1,4 +1,7 @@
+HttpCV
+======
 
+A opencv/httpserver webapp.
 
 Make sure you have `visual studio community`_, `cmake`_, `boost libs/headers`_, python_ and git installed.
 
