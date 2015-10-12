@@ -1,1 +1,3 @@
-python waf build
+cd build
+cmake --build . --config Release
+cd ..

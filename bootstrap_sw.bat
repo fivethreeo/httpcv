@@ -1,4 +1,3 @@
-python get_waf.py
 
 call variables.bat
 
