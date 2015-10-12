@@ -219,3 +219,5 @@ waf*
 cpp-netlib*
 opencv*
 *.lock-waf*
+vmime*
+Simple-Web-Server*

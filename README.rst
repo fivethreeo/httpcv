@@ -5,7 +5,14 @@ A opencv/httpserver webapp.
 
 Make sure you have `visual studio community`_, `cmake`_, `boost libs/headers`_, python_ and git installed.
 
-Edit env vars in variables.bat to reflect include/library locations.
+Install Cygwin and select packages 'make', 'dos2unix' and 'binutils'. p7zip, md5sum, patch
+
+set PATH=%PATH%;C:\Cygwin64\bin
+dos2unix *
+dos2unix -f configure
+"C:\Program Files\Microsoft Visual Studio 14.0\VC\x86_64vcvars.bat"
+bash runConfigureICU Cygwin/MSVC -prefix=/cygdrive/c/icu/dist -enable-static -disable-shared
+make && make install
 
 Open a cmd shell in this dir and run
 
