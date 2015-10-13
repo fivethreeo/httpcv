@@ -17,11 +17,9 @@ using namespace std;
 using namespace boost::property_tree;
 
 typedef SimpleWeb::Server<SimpleWeb::HTTP> HttpServer;
-typedef SimpleWeb::Client<SimpleWeb::HTTP> HttpClient;
-
 int main() {
-    //HTTP-server at port 8080 using 4 threads
-    HttpServer server(8080, 4);
+    //HTTP-server at port 8080 using 1 threads
+    HttpServer server(8080, 1);
     
     //Add resources using path-regex and method-string, and an anonymous function
     //POST-example for the path /string, responds the posted string
