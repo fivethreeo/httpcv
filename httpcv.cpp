@@ -1,5 +1,4 @@
 #include "Simple-Web-Server/server_http.hpp"
-#include "Simple-Web-Server/client_http.hpp"
 
 #include "vmime/vmime.hpp"
 

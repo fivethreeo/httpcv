@@ -25,7 +25,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
 set(Boost_USE_STATIC_LIBS        ON)
 set(Boost_USE_MULTITHREADED      ON)
-set(Boost_USE_STATIC_RUNTIME    ON)
+set(Boost_USE_STATIC_RUNTIME    OFF)
 #Only tested with versions 1.55 and 1.56
 find_package(Boost 1.59.0 COMPONENTS regex system thread chrono coroutine context filesystem date_time REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
@@ -46,6 +46,7 @@ target_link_libraries(httpcv ${Vmime_LIBRARIES})
 
 add_definitions(-DVMIME_STATIC)
 add_definitions(-DU_STATIC_IMPLEMENTATION)
+add_definitions(-DVMIME_SHARED_PTR_USE_CXX)
 
 #set_target_properties(httpcv PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:WINDOWS")
 #set_target_properties(httpcv PROPERTIES COMPILE_DEFINITIONS_DEBUG "_WINDOWS")

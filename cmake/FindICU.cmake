@@ -90,7 +90,7 @@ macro(icu_declare_component _NAME)
     set("${ICU_PRIVATE_VAR_NS}_COMPONENTS_${_NAME}" ${ARGN})
 endmacro(icu_declare_component)
 
-icu_declare_component(data sicudata)
+icu_declare_component(data sicudt)
 icu_declare_component(uc   sicuuc)         # Common and Data libraries
 icu_declare_component(i18n sicui18n sicuin) # Internationalization library
 icu_declare_component(io   sicuio sustdio)  # Stream and I/O Library
