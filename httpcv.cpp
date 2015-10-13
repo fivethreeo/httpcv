@@ -1,7 +1,7 @@
 #include "Simple-Web-Server/server_http.hpp"
 #include "Simple-Web-Server/client_http.hpp"
 
-#include "vmime/vmime.hpp"
+#include "mimetic.h"
 
 //Added for the json-example
 #define BOOST_SPIRIT_THREADSAFE
@@ -134,23 +134,7 @@ int main() {
         response << "HTTP/1.1 400 Bad Request\r\nContent-Length: " << content.length() << "\r\n\r\n" << content;
     };
     server.default_resource["POST"]=[](HttpServer::Response& response, shared_ptr<HttpServer::Request> request) {
-        vmime::utility::inputStreamAdapter is(request->content);
-        vmime::string data;
-        vmime::utility::outputStreamStringAdapter os(data);
-        vmime::utility::bufferedStreamCopy(is , os);
-        vmime::shared_ptr<vmime::message> msg = vmime::make_shared<vmime::message>();
-        const auto it=request->header.find("Content-Type");
-        msg->parse(data);       
 
-        vmime::messageParser mp(msg);/*
-// Output information about attachments
-cout << "Message has " << mp.getAttachmentCount() << "attachment(s)" << endl;
-for(int i=0;i<mp.getAttachmentCount();++i)
-{
-    vmime::shared_ptr <const vmime::attachment> att = mp.getAttachmentAt(i);
-    cerr << " − " << att->getType().generate() << endl;
-}*/
-    
         string name="me";
         response << "HTTP/1.1 200 OK\r\nContent-Length: " << name.length() << "\r\n\r\n" << name;
                 

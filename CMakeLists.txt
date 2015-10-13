@@ -32,17 +32,14 @@ include_directories(${Boost_INCLUDE_DIR})
 
 find_package(OPENCV REQUIRED)
 
-find_package(ICU COMPONENTS data uc i18n io le lx REQUIRED)
-
-find_package(Vmime REQUIRED)
-include_directories(${VMIME_INCLUDE_DIR})
+find_package(Mimetic REQUIRED)
+include_directories(${MIMETIC_INCLUDE_DIR})
 
 
 include_directories(.)
 add_executable(httpcv httpcv.cpp)
 target_link_libraries(httpcv ${Boost_LIBRARIES})
-target_link_libraries(httpcv ${VMIME_LIBRARIES})
-target_link_libraries(httpcv ${ICU_LIBRARIES})
+target_link_libraries(httpcv ${MIMETIC_LIBRARIES})
 target_link_libraries(httpcv ${OpenCV_LIBS} )
 
 set_target_properties(httpcv PROPERTIES COMPILE_DEFINITIONS_RELEASE "VMIME_STATIC")

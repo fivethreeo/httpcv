@@ -5,7 +5,7 @@ cd build
 call ..\variables.bat
 
 cmake -G "Visual Studio 14 2015 Win64"^
- -DVMIME_ROOT=%VMIME_ROOT%^
+ -DMIMETIC_ROOT=%MIMETIC_ROOT%^
  -DOPENCV_DIR="%OPENCV_DIR%"^
  ..\
 
