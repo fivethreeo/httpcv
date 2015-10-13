@@ -30,19 +30,22 @@ set(Boost_USE_STATIC_RUNTIME    ON)
 find_package(Boost 1.59.0 COMPONENTS regex system thread chrono coroutine context filesystem date_time REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
 
+find_package(Vmime REQUIRED)
+include_directories(${VMIME_INCLUDE_DIR})
+
+find_package(ICU COMPONENTS data uc i18n io le lx REQUIRED)
+
 find_package(OPENCV REQUIRED)
-
-find_package(Mimetic REQUIRED)
-include_directories(${MIMETIC_INCLUDE_DIR})
-
 
 include_directories(.)
 add_executable(httpcv httpcv.cpp)
 target_link_libraries(httpcv ${Boost_LIBRARIES})
-target_link_libraries(httpcv ${MIMETIC_LIBRARIES})
 target_link_libraries(httpcv ${OpenCV_LIBS} )
+target_link_libraries(httpcv ${ICU_LIBRARIES})
+target_link_libraries(httpcv ${Vmime_LIBRARIES})
 
-set_target_properties(httpcv PROPERTIES COMPILE_DEFINITIONS_RELEASE "VMIME_STATIC")
+add_definitions(-DVMIME_STATIC)
+add_definitions(-DU_STATIC_IMPLEMENTATION)
 
 #set_target_properties(httpcv PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:WINDOWS")
 #set_target_properties(httpcv PROPERTIES COMPILE_DEFINITIONS_DEBUG "_WINDOWS")
