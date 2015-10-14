@@ -33,6 +33,7 @@ if "%1" equ "bootstrap" (
      -DICU_ROOT=%ICU_ROOT%^
      -DCMAKE_INSTALL_PREFIX=%VMIME_ROOT%^
      ..\vmime
+    git apply ..\vmime_msvc_mt.diff
     cmake --build . --config Release --target INSTALL
     cd ..
     
