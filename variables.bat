@@ -7,5 +7,5 @@ set "ICU_ROOT=%PREFIXDRIVE%\icu"
 set "OPENCV_DIR=%PREFIXDRIVE%\opencv"
 set "VMIME_ROOT=%PREFIXDRIVE%\vmime"
 
-pause
+rem pause
 

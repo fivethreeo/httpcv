@@ -1,2 +1,3 @@
 bootstrap_opencv.bat
 bootstrap_vmime.bat
+bootstrap_sw.bat
