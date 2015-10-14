@@ -9,6 +9,8 @@ Download `ICU Precompiled`_ put in ``C:\icu\``
 
 Download `boost libs/headers`_ put in ``C:\boost_1_59_0\``
 
+Edit top of ``configure.bat`` for customizing locations.
+
 Open a cmd shell in this dir and run
 
 .. code-block:: bash
