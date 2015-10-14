@@ -13,7 +13,7 @@ Open a cmd shell in this dir and run
 
 .. code-block:: bash
 
-    bootstrap.bat
+    configure.bat bootstrap
 
     configure.bat
 
