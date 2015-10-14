@@ -1,5 +1,4 @@
-
-@echo off
+rem @echo off
 call variables.bat %~d0
 
 mkdir build
