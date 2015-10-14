@@ -5,9 +5,9 @@ A c++ opencv/httpserver webapp that works in windows msvc2015.
 
 Make sure you have `visual studio community`_, `cmake`_  and git installed.
 
-Download `ICU Precompiled`_ put in C:\icu\
+Download `ICU Precompiled`_ put in ``C:\icu\``
 
-Download `boost libs/headers`_ put in C:\boost_1_59_0\
+Download `boost libs/headers`_ put in ``C:\boost_1_59_0\``
 
 Open a cmd shell in this dir and run
 
