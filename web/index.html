@@ -49,15 +49,15 @@
 
         function uploadComplete(evt) {
             /* This event is raised when the server send back a response */
-            alert(evt.target.responseText);
+            document.getElementById('response').innerHTML = evt.target.responseText;
         }
 
         function uploadFailed(evt) {
-            alert("There was an error attempting to upload the file.");
+            document.getElementById('response').innerHTML = "There was an error attempting to upload the file.";
         }
 
         function uploadCanceled(evt) {
-            alert("The upload has been canceled by the user or the browser dropped the connection.");
+            document.getElementById('response').innerHTML = "The upload has been canceled by the user or the browser dropped the connection.";
         }
     </script>
 
@@ -78,6 +78,7 @@
             <input type="button" onclick="uploadFile()" value="Upload" />
         </div>
         <div id="progress"></div>
+        <div id="response"></div>
 
     </form>
 </body>

@@ -163,7 +163,7 @@ int main() {
             matrix_changed = true;
 
         }
-        string name="me";
+        string name="File received";
         response << "HTTP/1.1 200 OK\r\nContent-Length: " << name.length() << "\r\n\r\n" << name;
                 
     };
