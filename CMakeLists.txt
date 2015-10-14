@@ -25,24 +25,28 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/")
 
 set(Boost_USE_STATIC_LIBS        ON)
 set(Boost_USE_MULTITHREADED      ON)
-set(Boost_USE_STATIC_RUNTIME    ON)
+set(Boost_USE_STATIC_RUNTIME    OFF)
 #Only tested with versions 1.55 and 1.56
 find_package(Boost 1.59.0 COMPONENTS regex system thread chrono coroutine context filesystem date_time REQUIRED)
 include_directories(${Boost_INCLUDE_DIR})
 
+find_package(Vmime REQUIRED)
+include_directories(${VMIME_INCLUDE_DIR})
+
+find_package(ICU COMPONENTS data uc i18n io le lx REQUIRED)
+
 find_package(OPENCV REQUIRED)
-
-find_package(Mimetic REQUIRED)
-include_directories(${MIMETIC_INCLUDE_DIR})
-
 
 include_directories(.)
 add_executable(httpcv httpcv.cpp)
 target_link_libraries(httpcv ${Boost_LIBRARIES})
-target_link_libraries(httpcv ${MIMETIC_LIBRARIES})
 target_link_libraries(httpcv ${OpenCV_LIBS} )
+target_link_libraries(httpcv ${ICU_LIBRARIES})
+target_link_libraries(httpcv ${Vmime_LIBRARIES})
 
-set_target_properties(httpcv PROPERTIES COMPILE_DEFINITIONS_RELEASE "VMIME_STATIC")
+add_definitions(-DVMIME_STATIC)
+add_definitions(-DU_STATIC_IMPLEMENTATION)
+add_definitions(-DVMIME_SHARED_PTR_USE_CXX)
 
 #set_target_properties(httpcv PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:WINDOWS")
 #set_target_properties(httpcv PROPERTIES COMPILE_DEFINITIONS_DEBUG "_WINDOWS")
