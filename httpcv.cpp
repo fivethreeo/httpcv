@@ -10,15 +10,23 @@
 //Added for the default_resource example
 #include <fstream>
 #include <boost/filesystem.hpp>
+#include <boost/thread.hpp>
+
+#include "opencv2/opencv.hpp"
+#include "opencv2/highgui.hpp"
+#include "opencv2/imgproc.hpp"
 
 using namespace std;
 //Added for the json-example:
 using namespace boost::property_tree;
 
+cv::Mat matrix;   
+bool matrix_changed = false;
+
 typedef SimpleWeb::Server<SimpleWeb::HTTP> HttpServer;
 int main() {
     //HTTP-server at port 8080 using 1 threads
-    HttpServer server(8080, 1);
+    HttpServer server(8080, 2);
     
     //Add resources using path-regex and method-string, and an anonymous function
     //POST-example for the path /string, responds the posted string
@@ -139,28 +147,57 @@ int main() {
         const auto it=request->header.find("Content-Type");
         msg->parse(data);       
 
-        vmime::messageParser mp(msg);/*
-// Output information about attachments
-cout << "Message has " << mp.getAttachmentCount() << "attachment(s)" << endl;
-for(int i=0;i<mp.getAttachmentCount();++i)
-{
-    vmime::shared_ptr <const vmime::attachment> att = mp.getAttachmentAt(i);
-    cerr << " - " << att->getType().generate() << endl;
-}*/
+        vmime::messageParser mp(msg);
+        // Output information about attachments
+        cout << "Message has " << mp.getAttachmentCount() << "attachment(s)" << endl;
+        for(int i=0;i<mp.getAttachmentCount();++i)
+        {
+            vmime::shared_ptr <const vmime::attachment> att = mp.getAttachmentAt(i);
+            cerr << " - " << att->getType().generate() << endl;
+
+            vmime::byteArray data;
+            vmime::utility::outputStreamByteArrayAdapter adapter(data);
+            att->getData()->extract(adapter);
+
+            matrix = cv::imdecode(data, 1);
+            matrix_changed = true;
+
+        }
         string name="me";
         response << "HTTP/1.1 200 OK\r\nContent-Length: " << name.length() << "\r\n\r\n" << name;
                 
     };
-        
-    thread server_thread([&server](){
+    boost::thread server_thread([&server](){
         //Start server
         server.start();
     });
+    boost::thread display_thread([](){
+        for (;;)
+        {
+          try
+           {
+              boost::this_thread::interruption_point();
+           }
+           catch(boost::thread_interrupted&)
+           {
+              break;
+           }
+           if (matrix_changed) {
+              matrix_changed = false;
+              cv::imshow("Image", matrix);
+           }
+           cv::waitKey(30);
+        }
+    });
+    
     
     //Wait for server to start so that the client can connect
     this_thread::sleep_for(chrono::seconds(1));
 
     server_thread.join();
     
+    display_thread.interrupt();
+    display_thread.join();
+
     return 0;
 }
