@@ -25,3 +25,26 @@ index 25ad376..2783ead 100644
  # Shared library
  OPTION(
  	VMIME_BUILD_SHARED_LIBRARY
+diff --git a/cmake/FindICU.cmake b/cmake/FindICU.cmake
+index 786f157..eacd07c 100644
+--- a/cmake/FindICU.cmake
++++ b/cmake/FindICU.cmake
+@@ -90,12 +90,12 @@ macro(icu_declare_component _NAME)
+     set("${ICU_PRIVATE_VAR_NS}_COMPONENTS_${_NAME}" ${ARGN})
+ endmacro(icu_declare_component)
+ 
+-icu_declare_component(data icudata)
+-icu_declare_component(uc   icuuc)         # Common and Data libraries
+-icu_declare_component(i18n icui18n icuin) # Internationalization library
+-icu_declare_component(io   icuio ustdio)  # Stream and I/O Library
+-icu_declare_component(le   icule)         # Layout library
+-icu_declare_component(lx   iculx)         # Paragraph Layout library
++icu_declare_component(data sicudt)
++icu_declare_component(uc   sicuuc)         # Common and Data libraries
++icu_declare_component(i18n sicui18n sicuin) # Internationalization library
++icu_declare_component(io   sicuio sustdio)  # Stream and I/O Library
++icu_declare_component(le   sicule)         # Layout library
++icu_declare_component(lx   siculx)         # Paragraph Layout library
+ 
+ ########## Public ##########
+ set(${ICU_PUBLIC_VAR_NS}_FOUND TRUE)
