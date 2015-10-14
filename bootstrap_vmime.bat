@@ -1,6 +1,5 @@
-python get_waf.py
-
-call variables.bat
+@echo off
+call variables.bat %~d0
 
 git clone http://github.com/kisli/vmime.git
 mkdir vmime-build
@@ -15,6 +14,7 @@ cmake -G "Visual Studio 14 2015 Win64"^
  -DVMIME_SHARED_PTR_USE_CXX=ON^
  -DVMIME_CHARSETCONV_LIB=icu^
  -DICU_ROOT=%ICU_ROOT%^
+ -DCMAKE_INSTALL_PREFIX=%VMIME_ROOT%^
  ..\vmime
 cmake --build . --config Release --target INSTALL
 cd ..

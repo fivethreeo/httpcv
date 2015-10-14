@@ -1,7 +1,11 @@
-set BOOST_ROOT=D:\boost_1_59_0
-set BOOST_LIBRARYDIR=D:\boost_1_59_0\lib64-msvc-14.0
-set BOOST_COMPONENTS=%BOOST_LIBRARYDIR%
-set ICU_ROOT="C:\icu"
-set OPENCV_DIR=D:\opencv
-set VMIME_ROOT="C:\Program Files\vmime"
+
+set "PREFIXDRIVE=%~d1"
+
+set "BOOST_ROOT=%PREFIXDRIVE%\boost_1_59_0"
+set "BOOST_LIBRARYDIR=%PREFIXDRIVE%\boost_1_59_0\lib64-msvc-14.0"
+set "ICU_ROOT=%PREFIXDRIVE%\icu"
+set "OPENCV_DIR=%PREFIXDRIVE%\opencv"
+set "VMIME_ROOT=%PREFIXDRIVE%\vmime"
+
+pause
 

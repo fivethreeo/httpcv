@@ -1,5 +1,5 @@
-
-call variables.bat
+@echo off
+call variables.bat %~d0
 
 git clone https://github.com/eidheim/Simple-Web-Server.git
 mkdir Simple-Web-Server-build
