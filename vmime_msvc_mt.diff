@@ -1,13 +1,15 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 25ad376..2783ead 100644
+index 25ad376..70a9bfd 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -90,6 +90,22 @@ INCLUDE_DIRECTORIES(
+@@ -90,6 +90,24 @@ INCLUDE_DIRECTORIES(
  INCLUDE(GenerateExportHeader)
  ADD_COMPILER_EXPORT_FLAGS()
  
 +if(MSVC)
 +  add_definitions(-D_CRT_SECURE_NO_WARNINGS)
++  add_definitions(-DVMIME_STATIC)
++  add_definitions(-DU_STATIC_IMPLEMENTATION)
 +    foreach(flag_var
 +            CMAKE_C_FLAGS CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_RELEASE
 +            CMAKE_C_FLAGS_MINSIZEREL CMAKE_C_FLAGS_RELWITHDEBINFO
