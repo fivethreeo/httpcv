@@ -1,14 +1,22 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 25ad376..70a9bfd 100644
+index 25ad376..3bd5e5d 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -90,6 +90,24 @@ INCLUDE_DIRECTORIES(
- INCLUDE(GenerateExportHeader)
- ADD_COMPILER_EXPORT_FLAGS()
+@@ -844,7 +844,7 @@ CHECK_CXX_SOURCE_COMPILES(
+ )
+ 
+ IF(NOT VMIME_SHARED_PTR_USE_CXX AND NOT VMIME_SHARED_PTR_USE_BOOST)
+-	IF(CXX11_COMPILER_FLAGS AND VMIME_HAS_CXX11_SHARED_PTR)
++	IF(VMIME_HAS_CXX11_SHARED_PTR)
+ 		# If std::shared_ptr<> is available, use it by default
+ 		SET(VMIME_SHARED_PTR_USE_CXX_DEFAULT     ON)
+ 		SET(VMIME_SHARED_PTR_USE_BOOST_DEFAULT  OFF)
+@@ -964,6 +964,23 @@ IF(WIN32)
+ 
+ ENDIF()
  
 +if(MSVC)
 +  add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-+  add_definitions(-DVMIME_STATIC)
 +  add_definitions(-DU_STATIC_IMPLEMENTATION)
 +    foreach(flag_var
 +            CMAKE_C_FLAGS CMAKE_C_FLAGS_DEBUG CMAKE_C_FLAGS_RELEASE
@@ -24,9 +32,9 @@ index 25ad376..70a9bfd 100644
 +    endforeach(flag_var)
 +endif()
 +
- # Shared library
- OPTION(
- 	VMIME_BUILD_SHARED_LIBRARY
+ 
+ ##############################################################################
+ # POSIX-specific checks
 diff --git a/cmake/FindICU.cmake b/cmake/FindICU.cmake
 index 786f157..eacd07c 100644
 --- a/cmake/FindICU.cmake
