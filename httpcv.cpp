@@ -140,12 +140,12 @@ int main() {
     };
     server.default_resource["POST"]=[](HttpServer::Response& response, shared_ptr<HttpServer::Request> request) {
         vmime::utility::inputStreamAdapter is(request->content);
-        vmime::string data;
-        vmime::utility::outputStreamStringAdapter os(data);
+        vmime::string stringdata;
+        vmime::utility::outputStreamStringAdapter os(stringdata);
         vmime::utility::bufferedStreamCopy(is , os);
         vmime::shared_ptr<vmime::message> msg = vmime::make_shared<vmime::message>();
         const auto it=request->header.find("Content-Type");
-        msg->parse(data);       
+        msg->parse(stringdata);       
 
         vmime::messageParser mp(msg);
         // Output information about attachments
@@ -159,8 +159,8 @@ int main() {
             vmime::utility::outputStreamByteArrayAdapter adapter(data);
             att->getData()->extract(adapter);
 
-            matrix = cv::imdecode(data, 1);
-            matrix_changed = true;
+            //matrix = cv::imdecode(data, 1);
+            //matrix_changed = true;
 
         }
         string name="File received";
