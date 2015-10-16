@@ -16,9 +16,13 @@ if "%1" equ "bootstrap" (
     cmake -G "Visual Studio 14 2015 Win64"^
      -DBUILD_SHARED_LIBS=OFF^
      -DCMAKE_INSTALL_PREFIX=%OPENCV_DIR%^
+     -DBUILD_EXAMPLES=OFF^
+     -DBUILD_PERF_TESTS=OFF^
+     -DBUILD_TESTS=OFF^
      ..\opencv_sources
     cmake --build . --config Release --target INSTALL
     cd ..
+
 
     git clone http://github.com/kisli/vmime.git
     cd vmime

@@ -20,13 +20,14 @@ using namespace std;
 //Added for the json-example:
 using namespace boost::property_tree;
 
-cv::Mat matrix;   
-bool matrix_changed = false;
+
+vmime::byteArray image_data;
+bool data_changed = false;
 
 typedef SimpleWeb::Server<SimpleWeb::HTTP> HttpServer;
 int main() {
     //HTTP-server at port 8080 using 1 threads
-    HttpServer server(8080, 1);
+    HttpServer server(8080, 1, 50);
     
     //Add resources using path-regex and method-string, and an anonymous function
     //POST-example for the path /string, responds the posted string
@@ -154,14 +155,10 @@ int main() {
         {
             vmime::shared_ptr <const vmime::attachment> att = mp.getAttachmentAt(i);
             cerr << " - " << att->getType().generate() << endl;
-
-            vmime::string data;
-            vmime::utility::outputStreamStringAdapter adapter(data);
-            //att->getData()->extract(adapter);
-            att->getData()->generate(adapter, vmime::contentHandler::NO_ENCODING, 998);
-            // matrix = cv::imdecode(data, 1);
-            //matrix_changed = true;
-
+            image_data.clear();
+            vmime::utility::outputStreamByteArrayAdapter adapter(image_data);
+            att->getData()->extract(adapter);
+            data_changed = true;
         }
         string name="File received";
         response << "HTTP/1.1 200 OK\r\nContent-Length: " << name.length() << "\r\n\r\n" << name;
@@ -182,11 +179,25 @@ int main() {
            {
               break;
            }
-           if (matrix_changed) {
-              matrix_changed = false;
-              cv::imshow("Image", matrix);
+           if (data_changed) {
+              data_changed = false;
+              cv::Mat matrix = cv::imdecode(image_data, 1);
+              cv::Mat resized;
+              double rescalefactor = 300/matrix.size().width;
+              try
+              {
+                  cv::resize(matrix, resized, cv::Size(), rescalefactor, rescalefactor);
+              }
+              catch(cv::Exception& e)
+              {
+                  const char* err_msg = e.what();
+                  std::cout << "exception caught: " << err_msg << std::endl;
+              }
+
+              //cv::imshow("Image", resized);
+
            }
-           cv::waitKey(30);
+           cv::waitKey(100);
         }
     });
     
