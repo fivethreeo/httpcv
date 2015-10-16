@@ -26,7 +26,7 @@ bool matrix_changed = false;
 typedef SimpleWeb::Server<SimpleWeb::HTTP> HttpServer;
 int main() {
     //HTTP-server at port 8080 using 1 threads
-    HttpServer server(8080, 2);
+    HttpServer server(8080, 1);
     
     //Add resources using path-regex and method-string, and an anonymous function
     //POST-example for the path /string, responds the posted string
@@ -155,11 +155,11 @@ int main() {
             vmime::shared_ptr <const vmime::attachment> att = mp.getAttachmentAt(i);
             cerr << " - " << att->getType().generate() << endl;
 
-            vmime::byteArray data;
-            vmime::utility::outputStreamByteArrayAdapter adapter(data);
-            att->getData()->extract(adapter);
-
-            //matrix = cv::imdecode(data, 1);
+            vmime::string data;
+            vmime::utility::outputStreamStringAdapter adapter(data);
+            //att->getData()->extract(adapter);
+            att->getData()->generate(adapter, vmime::contentHandler::NO_ENCODING, 998);
+            // matrix = cv::imdecode(data, 1);
             //matrix_changed = true;
 
         }
