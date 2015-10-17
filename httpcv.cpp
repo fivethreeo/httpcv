@@ -9,6 +9,9 @@
 
 //Added for the default_resource example
 #include <fstream>
+#include <vector>
+#include <numeric>
+
 #include <boost/filesystem.hpp>
 #include <boost/thread.hpp>
 
@@ -21,9 +24,62 @@ using namespace std;
 using namespace boost::property_tree;
 
 
-vmime::byteArray image_data;
+vmime::byteArray image_data(1000);
 bool data_changed = false;
 
+// comparison function object
+bool compareContourAreas ( std::vector<cv::Point> contour1, std::vector<cv::Point> contour2 ) {
+    double i = fabs( contourArea(cv::Mat(contour1)) );
+    double j = fabs( contourArea(cv::Mat(contour2)) );
+    return ( i > j );
+}
+
+template<typename It>
+void sort_vertices(It begin, It end, typename It::value_type const& center) {
+    using point_type = typename It::value_type;
+
+    auto top_down = [](point_type const& a, point_type const& b) { return a.y > b.y; };
+    std::sort(begin, end, top_down);
+    auto middle = std::find_if(begin, end, [&center](point_type const& a) { return a.y <= center.y; });
+
+    auto left_right = [](point_type const& a, point_type const& b) { return a.x < b.x; };
+    auto right_left = [](point_type const& a, point_type const& b) { return a.x > b.x; };
+    std::stable_sort(begin, middle, left_right);
+    std::stable_sort(middle, end, right_left);
+}
+/*
+template<typename It>
+void sort_vertices(It begin, It end, typename It::value_type const& center) {
+    using point_type = typename It::value_type;
+
+    auto top_down = [](point_type const& a, point_type const& b) { return a.y > b.y; };
+    std::sort(begin, end, top_down);
+    auto middle = std::find_if(begin, end, [&center](point_type const& a) { return a.y <= center.y; });
+
+    auto left_right = [](point_type const& a, point_type const& b) { return a.x < b.x; };
+    auto right_left = [](point_type const& a, point_type const& b) { return a.x > b.x; };
+    std::stable_sort(begin, middle, left_right);
+    std::stable_sort(middle, end, right_left);
+}
+
+template<typename It>
+typename It::value_type polygon_center(It begin, It end) {
+    using point_type = typename It::value_type;
+    auto sum = std::accumulate(begin, end, point_type());
+    return sum / std::distance(begin, end);
+}
+
+template<typename It>
+void sort_vertices(It begin, It end) {
+    sort_vertices(begin, end, polygon_center(begin, end));
+}
+
+template<typename It>
+void sort_polygons(It begin, It end, std::size_t m) {
+    for (It cur_begin = begin; cur_begin != end; std::advance(cur_begin, m))
+        sort_vertices(cur_begin, std::next(cur_begin, m));
+}
+*/
 typedef SimpleWeb::Server<SimpleWeb::HTTP> HttpServer;
 int main() {
     //HTTP-server at port 8080 using 1 threads
@@ -158,6 +214,8 @@ int main() {
             image_data.clear();
             vmime::utility::outputStreamByteArrayAdapter adapter(image_data);
             att->getData()->extract(adapter);
+            adapter.flush();
+            cv::waitKey(10);
             data_changed = true;
         }
         string name="File received";
@@ -181,20 +239,48 @@ int main() {
            }
            if (data_changed) {
               data_changed = false;
-              cv::Mat matrix = cv::imdecode(image_data, 1);
-              cv::Mat resized;
-              double rescalefactor = 300/matrix.size().width;
               try
               {
-                  cv::resize(matrix, resized, cv::Size(), rescalefactor, rescalefactor);
+                  cv::Mat matrix = cv::imdecode(image_data, 1);
+                  cv::Mat resized;          
+                  cv::Mat gray;
+                  cv::Mat blurred;
+                  cv::Mat canny;
+                  std::vector<std::vector<cv::Point> > contours;
+                  std::vector<cv::Point> screenCnt;
+
+                  double rescalefactor = 300/matrix.size().width;
+                  cv::resize(matrix, resized, cv::Size(600, 600), 0, 0);
+                  cv::cvtColor(resized, gray, cv::COLOR_BGR2GRAY);
+                  cv::GaussianBlur(gray, blurred, cv::Size(7, 7), 1);
+                  cv::Canny(blurred, canny, 75, 200);
+                  cv::findContours(canny, contours, cv::RetrievalModes::RETR_LIST, cv::ContourApproximationModes::CHAIN_APPROX_SIMPLE);
+                  std::sort(contours.begin(), contours.end(), compareContourAreas);
+                  for(size_t i=0; i<contours.size(); i++) {
+                       // use contours[i] for the current contour
+                       double arclen = cv::arcLength(contours[i], true);
+                       cv::approxPolyDP(contours[i], screenCnt, 0.02*arclen, true);   
+                       if (screenCnt.size()==4) {
+                           break;
+                       }
+                  }
+                  std::vector<std::vector<cv::Point> > draw_contours;
+                  draw_contours.push_back(screenCnt);
+                  cv::drawContours(resized, contours, -1, cv::Scalar(0, 255, 0));
+                  cv::drawContours(resized, draw_contours, -1, cv::Scalar(255, 0, 0));
+                  sort_vertices(screenCnt.begin(), screenCnt.end()); 
+                  cv::imshow("Image", resized);
               }
-              catch(cv::Exception& e)
+              catch(const cv::Exception& e)
               {
                   const char* err_msg = e.what();
-                  std::cout << "exception caught: " << err_msg << std::endl;
+                  cerr << "exception caught: " << err_msg << std::endl;
               }
-
-              //cv::imshow("Image", resized);
+              catch(const exception &e)
+              {
+                  const char* err_msg = e.what();
+                  cerr << "exception caught: " << err_msg << std::endl;
+              }
 
            }
            cv::waitKey(100);

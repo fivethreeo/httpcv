@@ -23,7 +23,6 @@ if "%1" equ "bootstrap" (
     cmake --build . --config Release --target INSTALL
     cd ..
 
-
     git clone http://github.com/kisli/vmime.git
     cd vmime
     git apply --reject --whitespace=fix ..\vmime_msvc_mt.diff

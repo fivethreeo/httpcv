@@ -37,6 +37,9 @@ find_package(ICU COMPONENTS data uc i18n io le lx REQUIRED)
 
 find_package(OPENCV REQUIRED)
 
+add_definitions(-DVMIME_STATIC)
+add_definitions(-DU_STATIC_IMPLEMENTATION)
+
 include_directories(.)
 add_executable(httpcv httpcv.cpp)
 target_link_libraries(httpcv ${Boost_LIBRARIES})
@@ -44,8 +47,11 @@ target_link_libraries(httpcv ${OpenCV_LIBS} )
 target_link_libraries(httpcv ${ICU_LIBRARIES})
 target_link_libraries(httpcv ${VMIME_LIBRARIES})
 
-add_definitions(-DVMIME_STATIC)
-add_definitions(-DU_STATIC_IMPLEMENTATION)
+add_executable(cvtest cvtest.cpp)
+target_link_libraries(cvtest ${Boost_LIBRARIES})
+target_link_libraries(cvtest ${OpenCV_LIBS} )
+target_link_libraries(cvtest ${ICU_LIBRARIES})
+target_link_libraries(cvtest ${VMIME_LIBRARIES})
 
 #set_target_properties(httpcv PROPERTIES LINK_FLAGS_DEBUG "/SUBSYSTEM:WINDOWS")
 #set_target_properties(httpcv PROPERTIES COMPILE_DEFINITIONS_DEBUG "_WINDOWS")
