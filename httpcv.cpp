@@ -18,6 +18,8 @@
 #include "opencv2/opencv.hpp"
 #include "opencv2/highgui.hpp"
 #include "opencv2/imgproc.hpp"
+#include "opencv2/shape.hpp"
+
 
 using namespace std;
 //Added for the json-example:
@@ -34,52 +36,6 @@ bool compareContourAreas ( std::vector<cv::Point> contour1, std::vector<cv::Poin
     return ( i > j );
 }
 
-template<typename It>
-void sort_vertices(It begin, It end, typename It::value_type const& center) {
-    using point_type = typename It::value_type;
-
-    auto top_down = [](point_type const& a, point_type const& b) { return a.y > b.y; };
-    std::sort(begin, end, top_down);
-    auto middle = std::find_if(begin, end, [&center](point_type const& a) { return a.y <= center.y; });
-
-    auto left_right = [](point_type const& a, point_type const& b) { return a.x < b.x; };
-    auto right_left = [](point_type const& a, point_type const& b) { return a.x > b.x; };
-    std::stable_sort(begin, middle, left_right);
-    std::stable_sort(middle, end, right_left);
-}
-/*
-template<typename It>
-void sort_vertices(It begin, It end, typename It::value_type const& center) {
-    using point_type = typename It::value_type;
-
-    auto top_down = [](point_type const& a, point_type const& b) { return a.y > b.y; };
-    std::sort(begin, end, top_down);
-    auto middle = std::find_if(begin, end, [&center](point_type const& a) { return a.y <= center.y; });
-
-    auto left_right = [](point_type const& a, point_type const& b) { return a.x < b.x; };
-    auto right_left = [](point_type const& a, point_type const& b) { return a.x > b.x; };
-    std::stable_sort(begin, middle, left_right);
-    std::stable_sort(middle, end, right_left);
-}
-
-template<typename It>
-typename It::value_type polygon_center(It begin, It end) {
-    using point_type = typename It::value_type;
-    auto sum = std::accumulate(begin, end, point_type());
-    return sum / std::distance(begin, end);
-}
-
-template<typename It>
-void sort_vertices(It begin, It end) {
-    sort_vertices(begin, end, polygon_center(begin, end));
-}
-
-template<typename It>
-void sort_polygons(It begin, It end, std::size_t m) {
-    for (It cur_begin = begin; cur_begin != end; std::advance(cur_begin, m))
-        sort_vertices(cur_begin, std::next(cur_begin, m));
-}
-*/
 typedef SimpleWeb::Server<SimpleWeb::HTTP> HttpServer;
 int main() {
     //HTTP-server at port 8080 using 1 threads
@@ -204,22 +160,31 @@ int main() {
         const auto it=request->header.find("Content-Type");
         msg->parse(stringdata);       
 
-        vmime::messageParser mp(msg);
-        // Output information about attachments
-        cout << "Message has " << mp.getAttachmentCount() << "attachment(s)" << endl;
-        for(int i=0;i<mp.getAttachmentCount();++i)
+        string message="File received";
+        try
         {
-            vmime::shared_ptr <const vmime::attachment> att = mp.getAttachmentAt(i);
-            cerr << " - " << att->getType().generate() << endl;
-            image_data.clear();
-            vmime::utility::outputStreamByteArrayAdapter adapter(image_data);
-            att->getData()->extract(adapter);
-            adapter.flush();
-            cv::waitKey(10);
-            data_changed = true;
+            vmime::messageParser mp(msg);
+            // Output information about attachments
+            cout << "Message has " << mp.getAttachmentCount() << "attachment(s)" << endl;
+            for(int i=0;i<mp.getAttachmentCount();++i)
+            {
+                vmime::shared_ptr <const vmime::attachment> att = mp.getAttachmentAt(i);
+                cerr << " - " << att->getType().generate() << endl;
+                image_data.clear();
+                vmime::utility::outputStreamByteArrayAdapter adapter(image_data);
+                att->getData()->extract(adapter);
+                adapter.flush();
+                cv::waitKey(10);
+                data_changed = true;
+            }
         }
-        string name="File received";
-        response << "HTTP/1.1 200 OK\r\nContent-Length: " << name.length() << "\r\n\r\n" << name;
+        catch(const exception &e)
+        {
+            const char* err_msg = e.what();
+            cerr << "exception caught: " << err_msg << std::endl;
+            message="Error reading file";
+        }
+        response << "HTTP/1.1 200 OK\r\nContent-Length: " << message.length() << "\r\n\r\n" << message;
                 
     };
     boost::thread server_thread([&server](){
@@ -268,7 +233,9 @@ int main() {
                   draw_contours.push_back(screenCnt);
                   cv::drawContours(resized, contours, -1, cv::Scalar(0, 255, 0));
                   cv::drawContours(resized, draw_contours, -1, cv::Scalar(255, 0, 0));
-                  sort_vertices(screenCnt.begin(), screenCnt.end()); 
+                  //cv::Rect bRect = cv::boundingRect(screenCnt);
+                  //cv::rectangle(resized, bRect.tl(), bRect.bl(), cv::Scalar(0, 0, 255) );
+                  //sort_vertices(screenCnt.begin(), screenCnt.end()); 
                   cv::imshow("Image", resized);
               }
               catch(const cv::Exception& e)
