@@ -25,7 +25,7 @@ using namespace std;
 using namespace boost::property_tree;
 
 
-vmime::byteArray image_data(1000);
+vmime::byteArray image_data;
 bool data_changed = false;
 
 // comparison function object
@@ -151,6 +151,7 @@ int main() {
         response << "HTTP/1.1 400 Bad Request\r\nContent-Length: " << content.length() << "\r\n\r\n" << content;
     };
     server.default_resource["POST"]=[](HttpServer::Response& response, shared_ptr<HttpServer::Request> request) {
+        string message="File received";
         vmime::utility::inputStreamAdapter is(request->content);
         vmime::string stringdata;
         vmime::utility::outputStreamStringAdapter os(stringdata);
@@ -159,7 +160,6 @@ int main() {
         const auto it=request->header.find("Content-Type");
         msg->parse(stringdata);       
 
-        string message="File received";
         try
         {
             vmime::messageParser mp(msg);
@@ -177,12 +177,11 @@ int main() {
                 data_changed = true;
             }
         }
-        catch(const exception &e)
-        {
-            const char* err_msg = e.what();
-            cerr << "exception caught: " << err_msg << std::endl;
-            message="Error reading file";
-        }
+        catch(...)
+    {
+            cerr << boost::current_exception_diagnostic_information() << std::endl;
+
+    }
         response << "HTTP/1.1 200 OK\r\nContent-Length: " << message.length() << "\r\n\r\n" << message;
                 
     };
@@ -213,8 +212,8 @@ int main() {
                   std::vector<std::vector<cv::Point> > contours;
                   std::vector<cv::Point> screenCnt;
 
-                  double rescalefactor = 300/matrix.size().width;
-                  cv::resize(matrix, resized, cv::Size(600, 600), 0, 0);
+                  double rescalefactor = 600/matrix.size().width;
+                  cv::resize(matrix, resized, cv::Size(0, 0), rescalefactor, rescalefactor);
                   cv::cvtColor(resized, gray, cv::COLOR_BGR2GRAY);
                   cv::GaussianBlur(gray, blurred, cv::Size(7, 7), 1);
                   cv::Canny(blurred, canny, 75, 200);
@@ -232,8 +231,12 @@ int main() {
                   draw_contours.push_back(screenCnt);
                   cv::drawContours(resized, contours, -1, cv::Scalar(0, 255, 0));
                   cv::drawContours(resized, draw_contours, -1, cv::Scalar(255, 0, 0));
-                  //cv::Rect bRect = cv::boundingRect(screenCnt);
-                  //cv::rectangle(resized, bRect.tl(), bRect.bl(), cv::Scalar(0, 0, 255) );
+                  cv::Rect bRect = cv::boundingRect(screenCnt);
+                  cv::rectangle(resized, 
+                    cv::Point(bRect.x, bRect.y),
+                    cv::Point(bRect.x+bRect.width, bRect.y+bRect.height),
+                    cv::Scalar(0, 0, 255)
+                  );
                   //sort_vertices(screenCnt.begin(), screenCnt.end()); 
                   cv::imshow("Image", resized);
               }
