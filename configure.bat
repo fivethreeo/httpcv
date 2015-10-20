@@ -10,11 +10,12 @@ set "VMIME_ROOT=%PREFIXDRIVE%\vmime"
 
 if "%1" equ "bootstrap" (
     
-    git clone https://github.com/Itseez/opencv.git opencv_sources
+    git clone -b 2.4 https://github.com/Itseez/opencv.git opencv_sources
     mkdir opencv_build
     cd opencv_build
     cmake -G "Visual Studio 14 2015 Win64"^
      -DBUILD_SHARED_LIBS=OFF^
+     -DBUILD_WITH_STATIC_CRT=ON^
      -DCMAKE_INSTALL_PREFIX=%OPENCV_DIR%^
      -DBUILD_EXAMPLES=OFF^
      -DBUILD_PERF_TESTS=OFF^
@@ -60,6 +61,7 @@ if "%1" neq "bootstrap" (
      -DVMIME_ROOT=%VMIME_ROOT%^
      -DICU_ROOT=%ICU_ROOT%^
      -DOPENCV_DIR="%OPENCV_DIR%"^
+     -DOpenCV_STATIC=ON^
      ..\
     
     cd ..

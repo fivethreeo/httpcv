@@ -1,5 +1,5 @@
 
-#include "opencv2/opencv.hpp"
+#include "opencv2/core.hpp"
 #include "opencv2/highgui.hpp"
 #include "opencv2/imgproc.hpp"
 
@@ -27,7 +27,7 @@ int main() {
   cv::cvtColor(resized, gray, cv::COLOR_BGR2GRAY);
   cv::GaussianBlur(gray, blurred, cv::Size(5, 5), 0);
   cv::Canny(blurred, canny, 75, 200);
-  cv::findContours(canny, contours, cv::RetrievalModes::RETR_LIST, cv::ContourApproximationModes::CHAIN_APPROX_SIMPLE);
+  cv::findContours(canny, contours, cv::RETR_LIST, cv::CHAIN_APPROX_SIMPLE);
   std::sort(contours.begin(), contours.end(), compareContourAreas);
   for(size_t i=0; i<contours.size(); i++) {
        // use contours[i] for the current contour
