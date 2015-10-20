@@ -156,7 +156,7 @@ int main() {
         vmime::string stringdata;
         vmime::utility::outputStreamStringAdapter os(stringdata);
         vmime::utility::bufferedStreamCopy(is , os);
-        vmime::shared_ptr<vmime::message> msg = vmime::make_shared<vmime::message>();
+        vmime::message msg;
         const auto it=request->header.find("Content-Type");
         msg->parse(stringdata);       
 
@@ -167,13 +167,11 @@ int main() {
             cout << "Message has " << mp.getAttachmentCount() << "attachment(s)" << endl;
             for(int i=0;i<mp.getAttachmentCount();++i)
             {
-                vmime::shared_ptr <const vmime::attachment> att = mp.getAttachmentAt(i);
+                const vmime::attachment att = mp.getAttachmentAt(i);
                 cerr << " - " << att->getType().generate() << endl;
                 image_data.clear();
                 vmime::utility::outputStreamByteArrayAdapter adapter(image_data);
                 att->getData()->extract(adapter);
-                adapter.flush();
-                cv::waitKey(10);
                 data_changed = true;
             }
         }
