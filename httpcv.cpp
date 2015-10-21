@@ -156,7 +156,7 @@ int main() {
         vmime::string stringdata;
         vmime::utility::outputStreamStringAdapter os(stringdata);
         vmime::utility::bufferedStreamCopy(is , os);
-        vmime::message msg;
+        vmime::shared_ptr<vmime::message> msg = vmime::make_shared<vmime::message>();
         const auto it=request->header.find("Content-Type");
         msg->parse(stringdata);       
 
@@ -167,7 +167,7 @@ int main() {
             cout << "Message has " << mp.getAttachmentCount() << "attachment(s)" << endl;
             for(int i=0;i<mp.getAttachmentCount();++i)
             {
-                const vmime::attachment att = mp.getAttachmentAt(i);
+                vmime::shared_ptr <const vmime::attachment> att = mp.getAttachmentAt(i);
                 cerr << " - " << att->getType().generate() << endl;
                 image_data.clear();
                 vmime::utility::outputStreamByteArrayAdapter adapter(image_data);
@@ -210,8 +210,8 @@ int main() {
                   std::vector<std::vector<cv::Point> > contours;
                   std::vector<cv::Point> screenCnt;
 
-                  double rescalefactor = 600/matrix.size().width;
-                  cv::resize(matrix, resized, cv::Size(0, 0), rescalefactor, rescalefactor);
+                  double rescalefactor = (double)(600)/matrix.size().width;
+                  cv::resize(matrix, resized, cv::Size(), rescalefactor, rescalefactor);
                   cv::cvtColor(resized, gray, cv::COLOR_BGR2GRAY);
                   cv::GaussianBlur(gray, blurred, cv::Size(7, 7), 1);
                   cv::Canny(blurred, canny, 75, 200);
