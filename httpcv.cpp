@@ -21,17 +21,41 @@
 
 
 using namespace std;
+using namespace cv;
 //Added for the json-example:
 using namespace boost::property_tree;
 
 
 vmime::byteArray image_data;
 bool data_changed = false;
+void sortCorners(std::vector<cv::Point>& corners, cv::Point center)
+{
+    std::vector<cv::Point> top, bot;
+
+    for (int i = 0; i < corners.size(); i++)
+    {
+        if (corners[i].y < center.y)
+            top.push_back(corners[i]);
+        else
+            bot.push_back(corners[i]);
+    }
+
+    cv::Point tl = top[0].x > top[1].x ? top[1] : top[0];
+    cv::Point tr = top[0].x > top[1].x ? top[0] : top[1];
+    cv::Point bl = bot[0].x > bot[1].x ? bot[1] : bot[0];
+    cv::Point br = bot[0].x > bot[1].x ? bot[0] : bot[1];
+
+    corners.clear();
+    corners.push_back(tl);
+    corners.push_back(tr);
+    corners.push_back(br);
+    corners.push_back(bl);
+}
 
 // comparison function object
-bool compareContourAreas ( std::vector<cv::Point> contour1, std::vector<cv::Point> contour2 ) {
-    double i = fabs( contourArea(cv::Mat(contour1)) );
-    double j = fabs( contourArea(cv::Mat(contour2)) );
+bool compareContourAreas ( std::vector<Point> contour1, std::vector<Point> contour2 ) {
+    double i = fabs( contourArea(Mat(contour1)) );
+    double j = fabs( contourArea(Mat(contour2)) );
     return ( i > j );
 }
 
@@ -202,43 +226,68 @@ int main() {
               data_changed = false;
               try
               {
-                  cv::Mat matrix = cv::imdecode(image_data, 1);
-                  cv::Mat resized;          
-                  cv::Mat gray;
-                  cv::Mat blurred;
-                  cv::Mat canny;
-                  std::vector<std::vector<cv::Point> > contours;
-                  std::vector<cv::Point> screenCnt;
+                  Mat matrix = imdecode(image_data, 1);
+                  Mat output;
+                  Mat resized;          
+                  Mat gray;
+                  Mat blurred;
+                  Mat canny;
+                  std::vector<std::vector<Point> > contours;
+                  std::vector<Point> srcpoints;
 
                   double rescalefactor = (double)(600)/matrix.size().width;
-                  cv::resize(matrix, resized, cv::Size(), rescalefactor, rescalefactor);
-                  cv::cvtColor(resized, gray, cv::COLOR_BGR2GRAY);
-                  cv::GaussianBlur(gray, blurred, cv::Size(7, 7), 1);
-                  cv::Canny(blurred, canny, 75, 200);
-                  cv::findContours(canny, contours, cv::RETR_LIST, cv::CHAIN_APPROX_SIMPLE);
+                  resize(matrix, resized, Size(), rescalefactor, rescalefactor);
+                  cvtColor(resized, gray, COLOR_BGR2GRAY);
+                  GaussianBlur(gray, blurred, Size(7, 7), 1);
+                  Canny(blurred, canny, 75, 200);
+                  findContours(canny, contours, RETR_LIST, CHAIN_APPROX_SIMPLE);
                   std::sort(contours.begin(), contours.end(), compareContourAreas);
                   for(size_t i=0; i<contours.size(); i++) {
                        // use contours[i] for the current contour
-                       double arclen = cv::arcLength(contours[i], true);
-                       cv::approxPolyDP(contours[i], screenCnt, 0.02*arclen, true);   
-                       if (screenCnt.size()==4) {
+                       double arclen = arcLength(contours[i], true);
+                       approxPolyDP(contours[i], srcpoints, 0.02*arclen, true);   
+                       if (srcpoints.size()==4) {
                            break;
                        }
                   }
-                  std::vector<std::vector<cv::Point> > draw_contours;
-                  draw_contours.push_back(screenCnt);
-                  cv::drawContours(resized, contours, -1, cv::Scalar(0, 255, 0));
-                  cv::drawContours(resized, draw_contours, -1, cv::Scalar(255, 0, 0));
-                  cv::Rect bRect = cv::boundingRect(screenCnt);
-                  cv::rectangle(resized, 
-                    cv::Point(bRect.x, bRect.y),
-                    cv::Point(bRect.x+bRect.width, bRect.y+bRect.height),
-                    cv::Scalar(0, 0, 255)
+                  std::vector<std::vector<Point> > draw_contours;
+                  draw_contours.push_back(srcpoints);
+                  drawContours(resized, contours, -1, Scalar(0, 255, 0));
+                  drawContours(resized, draw_contours, -1, Scalar(255, 0, 0));
+                  Rect bRect = boundingRect(srcpoints);
+                  rectangle(resized, 
+                    Point(bRect.x, bRect.y),
+                    Point(bRect.x+bRect.width, bRect.y+bRect.height),
+                    Scalar(0, 0, 255)
                   );
-                  //sort_vertices(screenCnt.begin(), screenCnt.end()); 
-                  cv::imshow("Image", resized);
+                  Moments M = moments(srcpoints);
+                  Point centroid(int(M.m10/M.m00), int(M.m01/M.m00));
+                  sortCorners(srcpoints, centroid);
+                  
+                  vector<Point2f> srcfpoints(4);
+                  Mat(srcpoints).convertTo(srcfpoints, Mat(srcfpoints).type());
+                  for(size_t i=0; i<srcfpoints.size(); i++) {
+                    srcfpoints[i] *= 1./rescalefactor;
+                  }
+                  auto maxWidth = max(
+                    sqrt(pow(srcfpoints[0].x-srcfpoints[1].x,2) + pow(srcfpoints[1].x-srcfpoints[0].x,2)),
+                    sqrt(pow(srcfpoints[2].x-srcfpoints[3].x,2) + pow(srcfpoints[3].x-srcfpoints[2].x,2))
+                  );
+
+                  auto maxHeight= max(
+                    sqrt(pow(srcfpoints[0].y-srcfpoints[3].y,2) + pow(srcfpoints[3].y-srcfpoints[0].y,2)),
+                    sqrt(pow(srcfpoints[1].y-srcfpoints[2].y,2) + pow(srcfpoints[2].y-srcfpoints[1].y,2))
+                  );
+                  vector<Point2f> dstpoints(4);
+                  dstpoints[0] = Point2f(0,0);
+                  dstpoints[1] = Point2f(maxWidth - 1, 0);
+                  dstpoints[2] = Point2f(maxWidth - 1, maxHeight - 1);
+                  dstpoints[3] = Point2f(0, maxHeight - 1);
+                  Mat lambda = getPerspectiveTransform(srcfpoints, dstpoints);
+                  warpPerspective(matrix, output, lambda, Size(maxWidth, maxHeight));
+                  imshow("OImage", output); /**/ /**/
               }
-              catch(const cv::Exception& e)
+              catch(const Exception& e)
               {
                   const char* err_msg = e.what();
                   cerr << "exception caught: " << err_msg << std::endl;
@@ -250,7 +299,7 @@ int main() {
               }
 
            }
-           cv::waitKey(100);
+           waitKey(100);
         }
     });
     
